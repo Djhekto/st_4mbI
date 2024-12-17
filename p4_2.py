@@ -15,10 +15,14 @@ def scipy_solver(n):
         f[-1] = (3 + 2 * x[-1]) * x[-2] - 4
         return f
 
+    print("Решение для n = ", n)
     x0 = np.ones(n)  # Начальное приближение
     result = root(F, x0, method='hybr')  # Можно также использовать 'lm', 'broyden1' и другие методы
     if result.success:
+        print("Найденное решение:`", result.x)
+        print("`")
         return result.x
+        
     else:
         raise ValueError("SciPy не нашел решение")
 

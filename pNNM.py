@@ -78,7 +78,7 @@ def solve_for_different_n(n_values: List[int]):
             # Вычисляем ошибку
             error = np.linalg.norm(solution - exact_solution)
 
-            print(f"Найденное решение: {solution}")
+            print(f"Найденное решение: `{solution}`")
             print(f"Точное решение: {exact_solution}")
             print(f"Ошибка: {error:.2e}")
             print(f"Количество итераций: {iterations}")

@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 import pNM
 import p4_1
 
+import pypy
+
 
 def run_task4_1():
     
@@ -177,13 +179,115 @@ def display_theory_noscipy():
 
             return (a + b) / 2, iteration
 
+    ###### Полный код
     """)
+    
+    code1 ="""
+import math
+from typing import Callable
+def bisection_method(f: Callable[[float], float], a: float, b: float, epsilon: float = 1e-6, max_iter: int = 1000) -> tuple[float, int]:
+    if f(a) * f(b) > 0:
+        raise ValueError("Функция должна иметь разные знаки на концах интервала")
+
+    iteration = 0
+    while (b - a) > epsilon and iteration < max_iter:
+        c = (a + b) / 2  # середина интервала
+        if abs(f(c)) < epsilon:  # если нашли корень с нужной точностью
+            return c, iteration
+        if f(a) * f(c) < 0:  # если корень в левой половине
+            b = c
+        else:  # если корень в правой половине
+            a = c
+        iteration += 1
+
+    return (a + b) / 2, iteration
+
+
+def equation(x: float) -> float:
+    return (1 + x ** 2) * math.exp(-x) + math.sin(x)
+
+
+def find_intervals(f: Callable[[float], float], a: float, b: float, steps: int = 1000) -> list[tuple[float, float]]:
+    intervals = []
+    dx = (b - a) / steps
+    x_prev = a
+    y_prev = f(x_prev)
+
+    for i in range(1, steps + 1):
+        x_curr = a + i * dx
+        y_curr = f(x_curr)
+        if y_prev * y_curr <= 0:
+            intervals.append((x_prev, x_curr))
+        x_prev, y_prev = x_curr, y_curr
+
+    return intervals
+
+
+def main():
+    intervals = find_intervals(equation, 0, 10)
+
+    print("Найденные корни уравнения:")
+    print("(1+x^2)e^(-x)+sin(x)=0")
+    print("x    f(x)     Итераций")
+    print("-" * 45)
+
+    for a, b in intervals:
+        try:
+            root, iterations = bisection_method(equation, a, b)
+            print(f"{root:.6f}  {equation(root):15.2e}  {iterations:8d}")
+        except ValueError as e:
+            print(f"Ошибка на интервале [{a}, {b}]: {e}")
+
+
+main()
+    
+    """
+    st.code(code1)
+    res = pypy.execute_python_code(code1)
+    st.write(res)
+
 
 def display_theory_scipy():
     st.subheader("Решение задания 4.1 с использованием библиотеки Scipy")
     st.write("""
-    f(x) = (1 + x^2) * e^(-x) + sin(x)
+    ##### Полный код
     """)
+    
+    code1 = """
+import numpy as np
+import scipy
+
+# Определяем функцию
+def f(x):
+    return (1 + x**2) * np.exp(-x) + np.sin(x)
+
+# Основной интервал поиска
+a, b = 0, 10
+
+# Генерация точек для анализа функции
+x_vals = np.linspace(a, b, 1000)
+y_vals = f(x_vals)
+
+# Поиск интервалов смены знака
+sign_changes = np.where(np.sign(y_vals[:-1]) != np.sign(y_vals[1:]))[0]
+root_intervals = [(x_vals[i], x_vals[i+1]) for i in sign_changes]
+
+# Поиск корней на найденных интервалах методом бисекции
+roots = []
+for interval in root_intervals:
+    result = scipy.optimize.root_scalar(f, method='bisect', bracket=interval)
+    if result.converged:
+        roots.append(round(result.root, 6))
+
+# Вывод найденных корней
+print("Найдены корни уравнения:")
+for i, root in enumerate(roots, 1):
+    print(f"Корень {i}: x = {root:}")
+
+    """
+    st.code(code1)
+    res = pypy.execute_python_code(code1)
+    st.write(res)
 
 def display_task_working():
     st.write("""
@@ -200,7 +304,7 @@ def display_task_working():
 
     
     """)
-
+    
     #st.header("Задание 4.1")
     
     #st.subheader("Введите значения параметров ")
