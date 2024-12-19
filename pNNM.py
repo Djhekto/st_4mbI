@@ -82,6 +82,7 @@ def solve_for_different_n(n_values: List[int]):
             print(f"Точное решение: {exact_solution}")
             print(f"Ошибка: {error:.2e}")
             print(f"Количество итераций: {iterations}")
+            return solution
 
         except ValueError as e:
             print(f"Ошибка: {e}")
@@ -91,7 +92,7 @@ def callme(n: int):
     #n_values = [3, 5, 10]
     n_values = []
     n_values.append(n)
-    solve_for_different_n(n_values)
+    return solve_for_different_n(n_values)
     
 """
 if __name__ == "__main__":

@@ -130,7 +130,7 @@ def main():
                 # Вычисление погрешности
                 error = calculate_error(u_num, exact_solution, x, t)
 
-                print(f"{N:4d} {M:4d} {error:15.2e}")
+                print(f"{N:4d} {M:4d} {error:15.2e}\n")
 
                 # Построение графика для некоторых параметров
                 if N == 40 and M == 40:
@@ -142,7 +142,7 @@ def main():
                     for i in range(M + 1):
                         for j in range(N + 1):
                             u_exact[i, j] = exact_solution(x[j], t[i])
-                    plot_results(x, t, u_exact, f"Точное решение (N={N}, M={M})")
+                    plot_results(x, t, u_exact, f"\n\nТочное решение (N={N}, M={M})\n")
 
 
 if __name__ == "__main__":

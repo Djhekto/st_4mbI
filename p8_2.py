@@ -86,13 +86,13 @@ def calculate_error(x, y_approx, y_exact):
     return np.max(np.abs(y_approx - y_exact))
 
 
-def main():
+def main11(n, tol = 1e-6):
     try:
         # Ввод параметров
-        n = int(input("Введите количество точек разбиения (n > 1): "))
+        #n = int(input("Введите количество точек разбиения (n > 1): "))
 
 
-        tol = float(input("Введите требуемую точность (например, 1e-6): "))
+        #tol = float(input("Введите требуемую точность (например, 1e-6): "))
 
 
         # Решение уравнения
@@ -107,12 +107,14 @@ def main():
         # Вывод результатов
         print("\nРезультаты:")
         print(f"Количество итераций: {iterations}")
-        print(f"Максимальная абсолютная погрешность: {error:.2e}")
+        print(f"Максимальная абсолютная погрешность: {error:.2e}\n")
         print("\nСравнение решений:")
         print("    x      Приближенное  Точное")
         print("-" * 40)
         for i in range(n):
-            print(f"{x[i]:7.3f} {y_approx[i]:12.6f} {y_exact[i]:12.6f}")
+            print(f"{x[i]:7.3f} {y_approx[i]:12.6f} {y_exact[i]:12.6f}\n")
+        
+        return y_approx, x
 
 
     except ValueError:
@@ -123,5 +125,5 @@ def main():
         print(f"Произошла ошибка: {str(e)}")
 
 
-if __name__ == "__main__":
-    main()
+#if __name__ == "__main__":
+#    main()

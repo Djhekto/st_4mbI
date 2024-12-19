@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import streamlit as st
 
 
 class ParabolicSolver2D:
@@ -142,18 +143,20 @@ class ParabolicSolver2D:
         ax2.set_title(f'Точное решение (t = {self.t[time_index]:.3f})')
 
         plt.tight_layout()
-        plt.show()
+        #plt.show()
+        st.pyplot(ax2)
+        st.pyplot(ax1)
 
 
-def main():
+def main(N=20, M= 20):
     # Параметры задачи
     l1 = l2 = 1.0  # размеры прямоугольника
     T = 1.0  # конечное время
 
     try:
         print("\nВведите параметры сетки:")
-        N = int(input("Количество точек по пространству (N): "))
-        M = int(input("Количество точек по времени (M): "))
+        #N = int(input("Количество точек по пространству (N): "))
+        #M = int(input("Количество точек по времени (M): "))
 
         # Создание и решение задачи
         solver = ParabolicSolver2D(l1, l2, T, N, N, M)

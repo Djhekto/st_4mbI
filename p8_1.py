@@ -44,17 +44,20 @@ def solve_fredholm(n):
     return x, -y  # возвращаем знак решения
 
 
-def main():
+def main11(n):
     try:
-        n = int(input("Введите количество отрезков разбиения: "))
+        #n = int(input("Введите количество отрезков разбиения: "))
 
         x, y = solve_fredholm(n)
 
-        print("\nПриближенное решение:")
+        #print("\n\n\nПриближенное решение:")
+        print("\n\n")
         print("   x      y(x)")
         print("-" * 20)
         for i in range(len(x)):
-            print(f"{x[i]:7.3f} {y[i]:10.6f}")
+            print(f"{x[i]:7.3f} {y[i]:10.6f}\n")
+            
+        return y
 
 
     except ValueError:
@@ -63,5 +66,5 @@ def main():
         print("Ошибка! Не удалось решить систему уравнений.")
 
 
-if __name__ == "__main__":
-    main()
+#if __name__ == "__main__":
+#    main()

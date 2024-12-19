@@ -1,13 +1,8 @@
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.sparse import diags
-from scipy.sparse.linalg import spsolve
-import io
-from contextlib import redirect_stdout
 
 
-import p12_1
 import pypy
 
 
@@ -89,12 +84,13 @@ def display_theory():
     """)
     
     st.latex("""
+\[
 
 \\frac{\partial u}{\partial t} = \\frac{\partial}{\partial x} \left( k(x) \\frac{\partial u}{\partial x} \\right) + f(x, t),
 
-\quad 0 
+\quad 0 \]
 
-где  u(x, t)  — это температура в точке  x  и времени  t ,  k(x)  — коэффициент, зависящий от положения.
+где \( u(x, t) \) — это температура в точке \( x \) и времени \( t \), \( k(x) \) — коэффициент, зависящий от положения.
              
              """)
 
@@ -104,12 +100,12 @@ def display_theory():
 
 - **Физический смысл**:
 
-- Уравнение описывает, как температура  u  изменяется во времени под действием как внутренней диффузии
+- Уравнение описывает, как температура \( u \) изменяется во времени под действием как внутренней диффузии
     за счет
     """)
     
     st.latex("""
-     k(x) \\frac{\\partial u}{\partial x} ), так и внешнего источника или sink  f(x,t) .
+    \( k(x) \\frac{\\partial u}{\partial x} \)), так и внешнего источника или sink \( f(x,t) \).
     """)
 
     st.write(f"""
@@ -306,148 +302,13 @@ if __name__ == "__main__":
     
 
 def display_theory_scipy():
-    st.subheader("Решение задания 12.1")
+    st.subheader("Решение задания 4.1 с использованием библиотеки Scipy")
     st.write("""
-    ##### Пример кода
     """)
-    
-    st.code("""
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.sparse import diags
-from scipy.sparse.linalg import spsolve
-
-# Параметры задачи
-l = 1
-T = 1
-Nx = 35  # Число точек по пространству
-Nt = 1000  # Число точек по времени
-sigma = 0.5  # Симметричная схема
-
-dx = l / Nx
-dt = T / Nt
-x = np.linspace(0, l, Nx + 1)
-t = np.linspace(0, T, Nt + 1)
-
-# Функция точного решения
-def exact_solution(x, t):
-    return np.exp(-np.pi**2 * t) * np.sin(np.pi * x) + np.exp(-16 * np.pi**2 * t) * np.sin(4 * np.pi * x)
-
-
-# Решение с использованием SciPy
-u_scipy = np.zeros((Nt + 1, Nx + 1))
-u_scipy[0, :] = exact_solution(x, 0)
-
-alpha = sigma * dt / dx**2
-diagonal = (1 + 2 * alpha) * np.ones(Nx - 1)
-off_diagonal = -alpha * np.ones(Nx - 2)
-A = diags([off_diagonal, diagonal, off_diagonal], [-1, 0, 1]).tocsc()
-
-for n in range(0, Nt):
-    rhs = u_scipy[n, 1:-1] + (1 - sigma) * (u_scipy[n, 2:] - 2 * u_scipy[n, 1:-1] + u_scipy[n, :-2]) * dt / dx**2
-    u_scipy[n + 1, 1:-1] = spsolve(A, rhs)
-
-# ---------------------------------------------
-# Построение графиков
-plt.figure(figsize=(14, 7))
-
-# График для метода с использованием SciPy
-for i in range(0, Nt + 1, Nt // 5):
-    plt.plot(x, u_scipy[i, :], label=f'$t={t[i]:.2f}$')
-plt.plot(x, exact_solution(x, T), 'k--', label='$Точное\;решение$')
-plt.title('$Решение\;с\;SciPy$')
-plt.xlabel('$x$')
-plt.ylabel('$u$')
-plt.legend()
-
-plt.tight_layout()
-plt.show()
-
-            """)
     
 def display_task_working():
-    st.title("Численное решение нестационарной задачи математической физики")
-
-    st.write(r"""
-    Решаем уравнение: 
-    $$
-    \frac{\partial u}{\partial t} = \frac{\partial}{\partial x}\left(k(x)\frac{\partial u}{\partial x}\right) + f(x,t), \quad 0 < x < l, \quad 0 < t \leq T
-    $$
-
-    Граничные условия:
-    $$
-    \begin{aligned}
-      u(0,t) &= 0, \\
-      u(l,t) &= 0, \quad 0 < t \leq T
-    \end{aligned}
-    $$
-
-    Начальное условие:
-    $$
-    \begin{aligned}
-      u(x,0) = v(x), \quad 0 \leq x \leq l
-    \end{aligned}
-    $$
-    """)
-    st.subheader("C использованием библиотеки Scipy:")
-
-    # Параметры задачи с возможностью настройки
-    st.sidebar.header("Настройки задачи")
-    l = 1
-    T = 1
-    Nx = st.slider("Число точек по пространству (Nx)", 10, 100, 30)
-    Nt = st.slider("Число точек по времени (Nt)", 100, 2000, 1000)
-    sigma = st.slider("Симметричная схема (sigma)", 0.1, 1.0, 0.5)
-
-    dx = l / Nx
-    dt = T / Nt
-    x = np.linspace(0, l, Nx + 1)
-    t = np.linspace(0, T, Nt + 1)
-
-    # Функция точного решения
-    def exact_solution(x, t):
-        return np.exp(-np.pi**2 * t) * np.sin(np.pi * x) + np.exp(-16 * np.pi**2 * t) * np.sin(4 * np.pi * x)
-
-    # Решение с использованием SciPy
-    u_scipy = np.zeros((Nt + 1, Nx + 1))
-    u_scipy[0, :] = exact_solution(x, 0)
-
-    alpha = sigma * dt / dx**2
-    diagonal = (1 + 2 * alpha) * np.ones(Nx - 1)
-    off_diagonal = -alpha * np.ones(Nx - 2)
-    A = diags([off_diagonal, diagonal, off_diagonal], [-1, 0, 1]).tocsc()
-
-    for n in range(0, Nt):
-        rhs = u_scipy[n, 1:-1] + (1 - sigma) * (u_scipy[n, 2:] - 2 * u_scipy[n, 1:-1] + u_scipy[n, :-2]) * dt / dx**2
-        u_scipy[n + 1, 1:-1] = spsolve(A, rhs)
-
-    # Построение графиков
-    st.header("Решение:")
-
-    # График для метода с использованием SciPy
-    st.subheader("Решение с использованием SciPy")
-    fig2, ax2 = plt.subplots(figsize=(7, 5))
-    for i in range(0, Nt + 1, Nt // 5):
-        ax2.plot(x, u_scipy[i, :], label=f'$t={t[i]:.2f}$')
-    ax2.plot(x, exact_solution(x, T), 'k--', label='$Точное\;решение$')
-    ax2.set_title('$Решение\;с\;SciPy$')
-    ax2.set_xlabel('$x$')
-    ax2.set_ylabel('$u$')
-    ax2.legend()
-    st.pyplot(fig2)
-
-    st.write("# Решение без Scipy")
-    
-    printme1, res1  = countexample_metod1()
-    st.write(printme1)
-
-def countexample_metod1():
-    f = io.StringIO()
-    with redirect_stdout(f):
-        res = p12_1.main()
-    output_string = f.getvalue()
-    return output_string, res
-
+    st.write("""
+    """)    
 
 
 def display_extra():

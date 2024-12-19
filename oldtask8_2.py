@@ -1,19 +1,11 @@
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
-import io
-from contextlib import redirect_stdout
 
-from scipy.sparse.linalg import cg, LinearOperator
 
 import pypy
-import p8_2
 
 
-
-
-def exact_solution(x):
-    return 3*x
 def run_task8_2():
     
     menu = st.sidebar.radio("Выберете страницу:",
@@ -350,182 +342,10 @@ def display_theory_scipy():
     st.subheader("Решение задания 8.2 с использованием библиотеки Scipy")
     st.write("""
     """)
-    st.subheader("Решение задания 8.2")
-    st.write("""
-    ##### Пример кода
-    """)
-    
-    st.code("""
-import numpy as np
-from scipy.sparse.linalg import cg, LinearOperator
-import matplotlib.pyplot as plt
-
-def exact_solution(x):
-    return 3*x
-
-# Параметры разбиения
-N = 100
-a, b = -1, 1
-h = (b - a)/N
-s = np.linspace(a, b, N+1)
-
-# Правая часть: f(x) = x²
-f = s**2
-
-# Формируем матрицу A: A_{ij} = |s_i - s_j|
-S_i, S_j = np.meshgrid(s, s, indexing='ij')
-A = np.abs(S_i - S_j)
-
-# Система: A y = f/h
-rhs = f/h
-
-# Оператор для метода сопряжённых градиентов
-def mv(x):
-    return A.dot(x)
-A_op = LinearOperator((N+1, N+1), matvec=mv)
-
-tol = 1e-10
-y_approx, info = cg(A_op, rhs, atol=tol)
-
-if info == 0:
-    print("Система решена методом сопряжённых градиентов с заданной точностью.")
-else:
-    print("Метод сопряжённых градиентов не достиг требуемой точности.")
-
-# Невязка
-res = A.dot(y_approx) - rhs
-err = np.linalg.norm(res)
-print(f"Норма невязки: {err}")
-
-# Сравниваем с «точным» решением y(x)=3x
-y_exact = exact_solution(s)
-error_norm = np.linalg.norm(y_approx - y_exact)
-print(f"Норма ошибки между численным решением и точным y=3x: {error_norm}")
-
-# Построение графиков
-plt.figure(figsize=(10,4))
-
-plt.subplot(1,2,1)
-plt.plot(s, y_approx, label='Численное решение y(s)')
-plt.plot(s, y_exact, label='Точное решение y=3x', linestyle='--')
-plt.xlabel('s')
-plt.ylabel('y(s)')
-plt.grid(True)
-plt.legend()
-plt.title("Сравнение решений")
-
-# Проверим, что интеграл от найденного решения приближает x²:
-I_approx = A.dot(y_approx)*h
-
-plt.subplot(1,2,2)
-plt.plot(s, s**2, label='x² (правая часть)')
-plt.plot(s, I_approx, label='Интеграл с приближённым y(s)')
-plt.xlabel('x')
-plt.ylabel('значение')
-plt.grid(True)
-plt.legend()
-plt.title("Проверка интегрального уравнения")
-
-plt.tight_layout()
-plt.show()
-
-            """)
     
 def display_task_working():
-    st.title("Численное решение интегрального уравнения Фредгольма 1-го рода")
-    st.subheader("C использованием библиотеки Scipy:")
-    st.write(r"Решаем уравнение: $\int_{-1}^{1}|x-s|y(s)ds = x^2$, предполагая точное решение $y(x)=3x$")
-
-    N = st.sidebar.slider("Число разбиений (N):", min_value=50, max_value=500, value=100)
-    a, b = -1, 1
-    h = (b - a)/N
-    s = np.linspace(a, b, N+1)
-
-    # Правая часть: f(x) = x²
-    f = s**2
-
-    # Формируем матрицу A: A_{ij} = |s_i - s_j|
-    S_i, S_j = np.meshgrid(s, s, indexing='ij')
-    A = np.abs(S_i - S_j).astype(float)  # Приведём к float на всякий случай
-
-    # Система: A y = f/h
-    rhs = (f/h).astype(float)
-
-    # Создаём линейный оператор для метода cg
-    def mv(x):
-        return A.dot(x)
-    A_op = LinearOperator((N+1, N+1), matvec=mv)
-
-    tol = 1e-10
-    try:
-        y_approx, info = cg(A_op, rhs, atol=tol)
-        if info == 0:
-            st.write("Система решена методом сопряжённых градиентов с заданной точностью.")
-        else:
-            st.write(f"Метод сопряжённых градиентов вернул info={info}, возможно не достигнута требуемая точность.")
-    except Exception as e:
-        st.error(f"Ошибка при решении СЛАУ методом CG: {e}")
-        return
-
-    # Проверим невязку
-    res = A.dot(y_approx) - rhs
-    err = np.linalg.norm(res)
-    st.write(f"Норма невязки: {err}")
-
-    # Сравниваем с «точным» решением y(x)=3x
-    y_exact = exact_solution(s)
-    error_norm = np.linalg.norm(y_approx - y_exact)
-    st.write(f"Норма ошибки между численным решением и точным y=3x: {error_norm}")
-
-    #=====
-    printme1, res1_yaprox, res_x = countexample_metod1(30)
-
-
-
-
-    fig, ax = plt.subplots()
-    ax.plot(s, y_approx, label='$Численное решение y(s)$')
-    ax.plot(s, y_exact, label='$Точное\;решение\;y=3x$', linestyle='--')
-    ax.plot(res_x, res1_yaprox, label='$ решение без scipy $', linestyle='--')
-    ax.set_xlabel('s')
-    ax.set_ylabel('y(s)')
-    ax.grid(True)
-    ax.legend()
-    st.pyplot(fig)
-
-    # Проверим, что интеграл от найденного решения приближает x²:
-    I_approx = A.dot(y_approx)*h
-    fig2, ax2 = plt.subplots()
-    ax2.plot(s, s**2, label='$x^2\;(правая\;часть)$',marker='x')
-    ax2.plot(s, I_approx, label='$Интеграл\;с\;приближённым\;y(s)$')
-    ax2.set_xlabel('$x$')
-    ax2.set_ylabel('$значение$')
-    ax2.grid(True)
-    ax2.legend()
-    st.pyplot(fig2)
-
-    st.write("# решение без scipy")
-
-    st.write(printme1)
-        
-
-
-
-
-
-
-    if __name__ == "__main__":
-        display_task_working()
-
-    
-
-
-def countexample_metod1(n: int):
-    f = io.StringIO()
-    with redirect_stdout(f):
-        res, resx = p8_2.main11(n)
-    output_string = f.getvalue()
-    return output_string, res, resx
+    st.write("""
+    """)    
 
 
 def display_extra():

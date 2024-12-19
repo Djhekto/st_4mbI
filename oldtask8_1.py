@@ -1,16 +1,11 @@
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
-import io
-from contextlib import redirect_stdout
-
-
-from scipy.linalg import solve
 
 
 import pypy
 import p8_1
-#import ptask8_1skipy
+import ptask8_1skipy
 
 
 def run_task8_1():
@@ -230,218 +225,16 @@ if __name__ == "__main__":
     
 
 def display_theory_scipy():
-    st.subheader("Решение задания 8.1 c использованием scipy")
-    st.write("""
-    ##### Пример реализации
-    """)
-    
-    st.code("""
-import numpy as np
-from scipy.linalg import solve
-import matplotlib.pyplot as plt
-
-# Ядро
-def K(x, s):
-    return 1.0/(np.pi*(1+(x-s)**2))
-
-def build_weights(N, a, b, method):
-    h = (b - a)/N
-    if method == "Trapezoidal":
-        # Формула трапеций
-        w = np.full(N+1, h)
-        w[0] = h/2
-        w[-1] = h/2
-    elif method == "Rectangle (left)":
-        # Левые прямоугольники
-        w = np.zeros(N+1)
-        w[:N] = h  # последний узел не нужен, так как интеграл покрыт N прямоугольниками
-    elif method == "Simpson":
-        # Формула Симпсона для чётного N
-        if N % 2 != 0:
-            raise ValueError("Для метода Симпсона N должно быть чётным.")
-        w = np.zeros(N+1)
-        w[0] = h/3
-        w[-1] = h/3
-        for j in range(1, N):
-            if j % 2 == 1:
-                w[j] = 4*h/3
-            else:
-                w[j] = 2*h/3
-    else:
-        raise ValueError("Неизвестный метод квадратур.")
-    return w
-
-def solve_fredholm_second_kind(N, method):
-    a, b = -1, 1
-    x_nodes = np.linspace(a, b, N+1)
-    w = build_weights(N, a, b, method)
-    
-    # Матрица A = I - K_w
-    A = np.zeros((N+1, N+1))
-    for i in range(N+1):
-        for j in range(N+1):
-            A[i,j] = -K(x_nodes[i], x_nodes[j])*w[j]
-        A[i,i] += 1.0
-    
-    f = np.ones(N+1)
-    y = solve(A, f)
-    return x_nodes, y, w
-
-def compute_residual(x_nodes, y, w):
-    # Вычислим невязку: r(x_i) = y(x_i) - 1 - ∫K(x_i,s)*y(s)ds
-    # ≈ y(x_i) - 1 - Σ_j K(x_i,x_j)*y(x_j)*w_j
-    N = len(x_nodes)-1
-    res = np.zeros(N+1)
-    for i in range(N+1):
-        I_approx = np.sum(K(x_nodes[i], x_nodes)*y*w)
-        res[i] = y[i] - I_approx - 1.0
-    return res
-
-if __name__ == "__main__":
-    # Пример использования:
-    N_values = [50, 100]
-    methods = ["Trapezoidal", "Rectangle (left)", "Simpson"]
-
-    plt.figure(figsize=(10,8))
-
-    for i, method in enumerate(methods):
-        plt.subplot(len(methods), 1, i+1)
-        for N in N_values:
-            # Для Симпсона убедимся, что N чётное
-            if method == "Simpson" and N%2!=0:
-                continue
-            
-            x_nodes, y, w = solve_fredholm_second_kind(N, method)
-            res = compute_residual(x_nodes, y, w)
-            err_norm = np.linalg.norm(res, np.inf)
-            
-            label = f"N={N}, err={err_norm:.2e}"
-            plt.plot(x_nodes, y, label=label)
-        
-        plt.xlabel('x')
-        plt.ylabel('y(x)')
-        plt.title(f"Метод: {method}")
-        plt.grid(True)
-        plt.legend()
-
-    plt.tight_layout()
-    plt.show()
-
-            """)
+    ptask8_1skipy.run_task8_1()
+#    st.subheader("Решение задания 4.1 с использованием библиотеки Scipy")
+#    st.write("""
+#    """)
     
 def display_task_working():
-        st.title("Интерактивное решение интегрального уравнения Фредгольма второго рода")
-        st.write(r"""
-        Рассматриваем уравнение:
-        $$
-        y(x) - \int_{-1}^{1}\frac{1}{\pi(1+(x-s)^2)}y(s)ds = 1.
-        $$""")
-        st.subheader("Решение задания c использованием scipy")
-        st.write(r"""Выберите параметры разбиения и квадратурную формулу.""")
-
-        
-        method = st.sidebar.selectbox("Выберите квадратурную формулу", 
-                                      ["Трапеций", "Прямоугольников_(левых)", "Симпсона"])
-        if method == "Симпсона":
-            N = st.number_input("Количество узлов (n):", min_value=4, max_value=150, value=4, step=2)
-        else:
-            N = st.number_input("Количество узлов (n):", min_value=3, max_value=150, value=3, step=1)
-
-
-        N11111 = st.number_input("Для без scipy:", min_value=3, max_value=150, value=3, step=1)
-
-        a, b = -1, 1
-        h = (b - a)/N
-        
-        # Проверка на метод Симпсона
-        if method == "Симпсона" and N%2 != 0:
-            st.error("Для метода Симпсона число разбиений N должно быть чётным.")
-            return
-
-        # Узлы
-        x_nodes = np.linspace(a, b, N+1)
-
-        def K(x, s):
-            return 1.0/(np.pi*(1+(x-s)**2))
-
-        # Формируем веса в зависимости от метода
-        if method == "Трапеций":
-            # Трапеций
-            w = np.full(N+1, h)
-            w[0] = h/2
-            w[-1] = h/2
-        elif method == "Прямоугольников_(левых)":
-            # Левые прямоугольники
-            w = np.full(N+1, 0.0)
-            w[:N] = h  # последний узел не используется для прямоугольников
-        else:
-            # Simpson (N чётно)
-            w = np.zeros(N+1)
-            w[0] = h/3
-            w[-1] = h/3
-            for j in range(1, N):
-                if j%2 == 1:
-                    w[j] = 4*h/3
-                else:
-                    w[j] = 2*h/3
-
-        # Формируем матрицу A = I - K_w
-        A = np.zeros((N+1, N+1))
-        for i in range(N+1):
-            for j in range(N+1):
-                A[i,j] = -K(x_nodes[i], x_nodes[j])*w[j]
-            A[i,i] += 1.0
-
-        f = np.ones(N+1)
-        # Решаем СЛАУ
-        y = solve(A, f)
-
-        #============
-        printme1, res1_y = countexample_metod1(N11111)
-        
-        res1_y = [-1*e for e in res1_y]
-        #============
-        
-
-        # Отобразим результаты
-        fig, ax = plt.subplots()
-        ax.plot(x_nodes, y, label='$y(x)$')
-        #ax.plot(x_nodes, res1_y, label='y(x) no scipy')
-        ax.plot(x_nodes, res1_y, label='y(x) no scipy', linestyle='--', alpha=0.5)
-        ax.set_xlabel('$x$')
-        ax.set_ylabel('$y(x)$')
-        ax.grid(True)
-        ax.set_title(f"$Решение\;уравнения,\;N={N},\;метод={method}$")
-        ax.legend()
-
-        st.pyplot(fig)
-
-        # Вычислим невязку
-        I_approx = np.zeros(N+1)
-        for i in range(N+1):
-            I_approx[i] = np.sum(K(x_nodes[i], x_nodes)*y*w)
-        residual = y - I_approx - 1.0
-        err_norm = np.linalg.norm(residual, np.inf)
-
-        st.write(f"Максимальная абсолютная невязка: {err_norm}")
-        if err_norm > 1e-2:
-            st.warning("Невязка достаточно велика. Попробуйте увеличить N или сменить метод.")
-        
-        st.write("##### Решение без scipy\n\n")
-        st.write(printme1)
-        
-
-def countexample_metod1(n: int):
-    f = io.StringIO()
-    with redirect_stdout(f):
-        res = p8_1.main11(n)
-    output_string = f.getvalue()
-    return output_string, res
-    
-
-    
-
-    
+    st.write("""
+             ФФАААААААААААААААААААААААААААААААААААААА
+             А Я ХЗ КАК ОРГАНИЗОВОВАТЬ, ЕСЛИ У ОДНОГО ПРОГА У ДРУГОГО ПРИЛОЖЕНИЕ СТРИМЛИТ ААААААААААААААААААААА
+    """)    
 
 
 def display_extra():

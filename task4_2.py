@@ -381,15 +381,46 @@ def display_task_working():
     """)
 
     
-    result = countexample_metod1(n_val)
+    result, xres = countexample_metod1(n_val)
     st.write("""вывод программы без scipy""")
     st.write(result)
     #resres = eval(evaluate_single_fragment(result))
     #st.write(resres )
     
-    result1 = countexample_metod2(n_val1)
+    result1, xres1 = countexample_metod2(n_val1)
     st.write("""вывод программы scipy""")
     st.write(result1)
+    
+    print("-------------",xres, xres1)
+    try:
+        xdif = [e - xres1[i] for i,e in enumerate(xres) ]
+    except:
+        pass
+    
+    print(xdif)
+    
+    fig, ax = plt.subplots(figsize=(10, 6))
+    
+    # Plot xres1 (SciPy results)
+    ax.plot(range(len(xres1)), xres1, 'ro-', label='SciPy')
+    
+    # Plot xres (Newton's method results)
+    ax.plot(range(len(xres)), xres, 'bo-', label='Newton\'s method')
+    
+    # Plot xdif (difference)
+    ax.plot(range(len(xdif)), xdif, 'go-', label='Difference')
+    
+    # Set labels and title
+    ax.set_xlabel('Index of variable')
+    ax.set_ylabel('Value of variable')
+    ax.set_title('Comparison of Solutions')
+
+    # Add legend
+    ax.legend()
+
+    # Display the plot
+    st.pyplot(fig)
+    
     #resres1 = eval(evaluate_single_fragment(result1))
     #st.write(resres1 )
 
@@ -414,16 +445,16 @@ def display_task_working():
 def countexample_metod1(n: int):
     f = io.StringIO()
     with redirect_stdout(f):
-        pNNM.callme(n)
+        res = pNNM.callme(n)
     output_string = f.getvalue()
-    return output_string
+    return output_string, res
 
 def countexample_metod2(n: int):
     f = io.StringIO()
     with redirect_stdout(f):
-        p4_2.scipy_solver(n)
+        res = p4_2.scipy_solver(n)
     output_string = f.getvalue()
-    return output_string
+    return output_string, res
 
 def display_extra():
     st.subheader("Дополнительная информация о задании 4.2")
